@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Yangi ishchi — Qurilish Nazorat</title>
+  <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="assets/style.css">
+  <link rel="stylesheet" href="assets/qn.css">
+  <style>
+    .worker-create{max-width:1120px}
+    .create-intro{margin-bottom:18px;color:var(--steel-3);font-size:13px;line-height:1.55}
+    .create-columns{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px}
+    .create-panel{height:100%}
+    .create-panel .card-head{min-height:54px}
+    .create-panel .card-body{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:0 12px}
+    .create-panel .field{min-width:0}
+    .create-panel .field.full{grid-column:1/-1}
+    .create-panel .help{margin:-7px 0 12px;color:var(--steel-3);font-size:11px;line-height:1.45}
+    .yes-toggle{
+      display:flex;align-items:center;justify-content:space-between;gap:14px;
+      width:100%;padding:11px 12px;margin-bottom:12px;border:1px solid var(--line);
+      border-radius:8px;background:var(--paper);cursor:pointer;text-align:left;
+    }
+    .yes-toggle input{position:absolute;width:1px;height:1px;opacity:0}
+    .yes-toggle .toggle-label{font-size:12px;font-weight:600}
+    .yes-toggle .switch{position:relative;width:42px;height:24px;flex:none;border-radius:99px;background:#aeb6b8;transition:background .15s}
+    .yes-toggle .switch::after{content:"";position:absolute;top:3px;left:3px;width:18px;height:18px;border-radius:50%;background:#fff;box-shadow:0 1px 3px #0003;transition:transform .15s}
+    .yes-toggle input:checked+.switch{background:var(--moss)}
+    .yes-toggle input:checked+.switch::after{transform:translateX(18px)}
+    .yes-toggle input:focus-visible+.switch{outline:2px solid var(--amber-dark);outline-offset:2px}
+    .conditional-fields{display:none;grid-template-columns:repeat(2,minmax(0,1fr));gap:0 12px}
+    .conditional-fields.open{display:grid}
+    .deadline-note{
+      padding:12px 14px;margin:16px 0 0;border-left:4px solid var(--rust);
+      border-radius:7px;background:var(--rust-bg);color:#773322;font-size:12px;line-height:1.55;
+    }
+    .create-actions{display:flex;justify-content:flex-end;gap:10px;flex-wrap:wrap;padding-top:16px}
+    @media(max-width:760px){.create-columns{grid-template-columns:1fr}}
+    @media(max-width:480px){.create-panel .card-body{grid-template-columns:1fr}.create-panel .field.full{grid-column:auto}.create-actions .btn{width:100%}}
+  </style>
+</head>
+<body>
+  <div class="shell">
+    <div id="sidebarSlot"></div>
+    <main class="main">
+      <div id="topbarSlot"></div>
+      <div class="content">
+        <section id="yangi" class="worker-create" style="scroll-margin-top:70px">
+          <div class="section-lbl">Yangi ishchini ro‘yxatga olish</div>
+          <p class="create-intro">Shaxsiy ma’lumotlarni va mavjud hujjatlarni kiriting. Migratsion karta Rossiyaga kirgan kuni rasmiylashtiriladi; patent hujjatlarini kirish sanasidan boshlab 30 kun ichida topshirish muddatini tizim kuzatadi.</p>
+
+          <form id="workerForm" class="card">
+            <div class="card-body">
+              <div class="create-columns">
+                <section class="card create-panel">
+                  <div class="card-head"><h3>Shaxsiy ma’lumotlar</h3></div>
+                  <div class="card-body">
+                    <div class="field">
+                      <label for="n_country">Davlati *</label>
+                      <select id="n_country" required>
+                        <option value="">Davlatni tanlang</option>
+                        <option>O'zbekiston</option><option>Tojikiston</option>
+                        <option>Qirg'iziston</option><option>Qozog'iston</option>
+                      </select>
+                    </div>
+                    <div class="field">
+                      <label for="n_dob">Tug‘ilgan sana *</label>
+                      <input type="date" id="n_dob" required>
+                    </div>
+                    <div class="field">
+                      <label for="n_i">Ismi *</label>
+                      <input id="n_i" autocomplete="given-name" required>
+                    </div>
+                    <div class="field">
+                      <label for="n_f">Familiyasi *</label>
+                      <input id="n_f" autocomplete="family-name" required>
+                    </div>
+                    <div class="field full">
+                      <label for="n_o">Otasining ismi *</label>
+                      <input id="n_o" required>
+                    </div>
+                    <div class="field">
+                      <label for="n_p">Pasport raqami *</label>
+                      <input id="n_p" autocomplete="off" required>
+                    </div>
+                    <div class="field">
+                      <label for="n_pass_exp">Pasport amal qilish muddati *</label>
+                      <input type="date" id="n_pass_exp" required>
+                    </div>
+                    <div class="field full">
+                      <label for="n_k">Rossiyaga kirgan sana *</label>
+                      <input type="date" id="n_k" required>
+                      <div class="help">Patent topshirishning oxirgi sanasi shu kundan 30 kun hisoblanadi.</div>
+                    </div>
+                  </div>
+                </section>
+
+                <section class="card create-panel">
+                  <div class="card-head"><h3>Hujjatlar va xaridlar</h3></div>
+                  <div class="card-body">
+                    <div class="field full">
+                      <label for="n_karta_m">Migratsion karta amal qilish muddati *</label>
+                      <input type="date" id="n_karta_m" required>
+                      <div class="help">Migratsion karta rasmiylashtirilgan sana Rossiyaga kirgan sana bilan bir xil deb olinadi: <b id="kartaEntryDate">kirish sanasi tanlanmagan</b>. Karta xarajati ishchi qarziga yozilmaydi.</div>
+                    </div>
+
+                    <div class="field full">
+                      <label class="yes-toggle" for="n_ticket">
+                        <span class="toggle-label">Bilet sotib olinganmi?</span>
+                        <input type="checkbox" id="n_ticket" aria-controls="ticketFields">
+                        <span class="switch" aria-hidden="true"></span>
+                      </label>
+                      <div class="conditional-fields" id="ticketFields">
+                        <div class="field">
+                          <label for="n_b">Bilet narxi (<span class="rub"></span>) *</label>
+                          <input type="number" id="n_b" min="0" step="1">
+                        </div>
+                        <div class="field">
+                          <label for="n_c">Bilet cheki (rasm)</label>
+                          <input type="file" id="n_c" accept="image/*">
+                        </div>
+                      </div>
+                    </div>
+
+                    <div class="field full">
+                      <label class="yes-toggle" for="n_cert">
+                        <span class="toggle-label">Oldindan olingan sertifikati bormi?</span>
+                        <input type="checkbox" id="n_cert" aria-controls="certFields">
+                        <span class="switch" aria-hidden="true"></span>
+                      </label>
+                      <div class="conditional-fields" id="certFields">
+                        <div class="field">
+                          <label for="n_cert_s">Olingan sana *</label>
+                          <input type="date" id="n_cert_s">
+                        </div>
+                        <div class="field">
+                          <label for="n_cert_m">Amal qilish muddati *</label>
+                          <input type="date" id="n_cert_m">
+                        </div>
+                      </div>
+                      <div class="help" id="certHelp">Yo‘q bo‘lsa sertifikat olish jarayonida deb belgilanadi.</div>
+                    </div>
+
+                    <div class="field full">
+                      <label class="yes-toggle" for="n_insurance">
+                        <span class="toggle-label">Sug‘urtasi bormi?</span>
+                        <input type="checkbox" id="n_insurance" aria-controls="insuranceFields">
+                        <span class="switch" aria-hidden="true"></span>
+                      </label>
+                      <div class="conditional-fields" id="insuranceFields">
+                        <div class="field">
+                          <label for="n_insurance_m">Sug‘urta amal qilish muddati *</label>
+                          <input type="date" id="n_insurance_m">
+                        </div>
+                      </div>
+                      <div class="help" id="insuranceHelp">Yo‘q bo‘lsa sug‘urta olish jarayoni va 30 kunlik patent nazoratiga qo‘shiladi.</div>
+                    </div>
+
+                    <div class="field full">
+                      <label for="n_y">Boshqa yo‘l xarajati (<span class="rub"></span>)</label>
+                      <input type="number" id="n_y" min="0" step="1">
+                    </div>
+                    <div class="field full">
+                      <label for="n_z">Yo‘l xarajati izohi</label>
+                      <input id="n_z" placeholder="Ixtiyoriy izoh">
+                    </div>
+                  </div>
+                </section>
+              </div>
+
+              <div class="deadline-note">
+                <b>Muhim:</b> migratsion karta Rossiyaga kirgan kuni rasmiylashtiriladi. Patent uchun kerakli hujjatlarni kirgan kundan boshlab 30 kun ichida topshirish kerak; tizim muddatlarni kuzatib, eslatma ko‘rsatadi.
+              </div>
+              <div class="create-actions">
+                <a class="btn ghost" href="hr.html">Bekor qilish</a>
+                <button class="btn amber" type="submit">Ishchini ro‘yxatga olish →</button>
+              </div>
+            </div>
+          </form>
+        </section>
+      </div>
+    </main>
+  </div>
+
+  <script src="assets/data.js"></script>
+  <script src="assets/app.js"></script>
+  <script src="assets/qn.js"></script>
+  <script src="assets/hr.js"></script>
+  <script>
+    function syncConditional(toggleId,fieldsId,requiredIds){
+      const toggle=document.getElementById(toggleId),fields=document.getElementById(fieldsId);
+      const update=()=>{
+        fields.classList.toggle('open',toggle.checked);
+        requiredIds.forEach(id=>{document.getElementById(id).required=toggle.checked});
+      };
+      toggle.addEventListener('change',update);
+      update();
+    }
+    syncConditional('n_ticket','ticketFields',['n_b']);
+    syncConditional('n_cert','certFields',['n_cert_s','n_cert_m']);
+    syncConditional('n_insurance','insuranceFields',['n_insurance_m']);
+    document.getElementById('n_k').addEventListener('input',event=>{
+      document.getElementById('kartaEntryDate').textContent=event.target.value||'kirish sanasi tanlanmagan';
+    });
+    document.getElementById('workerForm').addEventListener('submit',event=>{
+      event.preventDefault();
+      newW();
+    });
+    render();demo();mountShell('hr','yangi','Yangi ishchi','Shaxsiy ma’lumotlar va hujjat holatini kiriting');
+  </script>
+</body>
+</html>

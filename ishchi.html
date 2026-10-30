@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Profilim — Qurilish Nazorat</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Oswald:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/style.css">
+<style>
+.doc-grid{ display:grid; grid-template-columns:repeat(4,1fr); gap:12px; margin-bottom:22px; }
+@media(max-width:900px){ .doc-grid{ grid-template-columns:repeat(2,1fr); } }
+@media(max-width:500px){ .doc-grid{ grid-template-columns:1fr 1fr; gap:8px; } }
+
+.profile-head{
+  display:flex; gap:20px; align-items:flex-start; flex-wrap:wrap;
+}
+.profile-meta{ flex:1; min-width:200px; }
+.tag-row{ display:flex; gap:8px; flex-wrap:wrap; margin-top:12px; }
+
+/* payment history row */
+.pay-row{ background:var(--paper-2); border-radius:8px; padding:12px 14px; margin-bottom:8px; }
+.pay-row .pay-head{ display:flex; justify-content:space-between; align-items:center; gap:8px; flex-wrap:wrap; }
+.pay-row .pay-detail{ margin-top:8px; border-top:1px solid var(--line); padding-top:8px; font-size:12.5px; color:var(--steel-3); display:none; }
+.pay-row.open .pay-detail{ display:block; }
+</style>
+</head>
+<body>
+<div class="shell">
+  <div id="sidebarSlot"></div>
+  <div class="main">
+    <div id="topbarSlot"></div>
+    <div class="content">
+
+      <!-- PROFILE HEADER -->
+      <div class="card mb-26">
+        <div class="card-body">
+          <div class="profile-head">
+            <div style="position:relative">
+              <div class="avatar lg" id="avatarBox" style="background-color:#34434c">ST</div>
+              <button class="btn amber sm icon"
+                style="position:absolute;bottom:-6px;right:-6px;border-radius:99px;padding:5px;width:26px;height:26px;"
+                onclick="document.getElementById('photoInput').click()" title="Rasm qo'shish">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="13" height="13">
+                  <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/>
+                  <circle cx="12" cy="13" r="4"/>
+                </svg>
+              </button>
+              <input type="file" id="photoInput" accept="image/*" style="display:none">
+            </div>
+            <div class="profile-meta">
+              <h2 style="font-size:20px">Sardor Tursunov</h2>
+              <div style="color:var(--steel-3);font-size:13px;margin-top:4px">
+                Baxtiyor o'g'li &nbsp;·&nbsp; Aziz Karimov brigadasi &nbsp;·&nbsp; O'zbekiston
+              </div>
+              <div class="tag-row">
+                <span class="id-tag">Pasport <b class="mono">AB1234567</b></span>
+                <span class="id-tag amber">Kirgan <b>10.02.2025</b></span>
+                <span class="id-tag">Avans <b class="mono">50 000 ₽</b></span>
+              </div>
+            </div>
+            <div style="flex-shrink:0">
+              <div style="font-size:10px;text-transform:uppercase;letter-spacing:.1em;color:var(--steel-3);margin-bottom:6px">Holat</div>
+              <span class="chip"><span class="dot"></span>Faol ishchi</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- DOCUMENT COUNTDOWNS -->
+      <div class="section-lbl">Hujjatlar muddatlari</div>
+      <div class="doc-grid" id="docGrid"></div>
+
+      <!-- MANZIL -->
+      <div class="card mb-26">
+        <div class="card-body" style="display:flex;gap:14px;align-items:center;flex-wrap:wrap">
+          <div>
+            <div style="font-size:10.5px;text-transform:uppercase;letter-spacing:.1em;color:var(--steel-3);margin-bottom:4px">Ro'yxatga olish manzili</div>
+            <div style="font-weight:600">Okrujnoy shosse 56-uy</div>
+            <div style="font-size:12.5px;color:var(--steel-3);margin-top:2px">Qo'yilgan: 10.02.2025 &nbsp;·&nbsp; Amal qiladi: 18.08.2026</div>
+          </div>
+          <div style="margin-left:auto" id="royxatChip"></div>
+        </div>
+      </div>
+
+      <!-- TABS -->
+      <div class="tabs" id="mainTabs">
+        <button class="active" data-tab="davomat">Ish kunlari</button>
+        <button data-tab="oylik">Oylik tarixi</button>
+        <button data-tab="brigada">Brigada tarixi</button>
+        <button data-tab="patent">Patent to'lovlari</button>
+      </div>
+
+      <!-- TAB: davomat -->
+      <div data-tabpanel="davomat">
+        <div class="card">
+          <div class="card-head" style="flex-wrap:wrap;gap:10px">
+            <h3>Ish kunlari arxivi</h3>
+            <select id="oyFilter" style="width:auto;min-width:160px">
+              <option value="avg">Avgust 2026</option>
+              <option value="iyl">Iyul 2026</option>
+              <option value="iyn">Iyun 2026</option>
+            </select>
+          </div>
+          <div class="tbl-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Sana</th>
+                  <th>Brigada</th>
+                  <th>Ish soati</th>
+                  <th>Holat</th>
+                </tr>
+              </thead>
+              <tbody id="attBody"></tbody>
+            </table>
+          </div>
+          <div style="padding:12px 18px;font-size:12.5px;color:var(--steel-3);border-top:1px solid var(--line-soft);display:flex;gap:16px;flex-wrap:wrap">
+            <span>Jami: <b id="totalDays">—</b> kun</span>
+            <span>Jami soat: <b id="totalHours">—</b></span>
+            <span>Kelmagan: <b id="absentDays" style="color:var(--rust)">—</b> kun</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- TAB: oylik -->
+      <div data-tabpanel="oylik" style="display:none">
+        <div class="card">
+          <div class="card-head"><h3>Oylik to'lovlar tarixi</h3></div>
+          <div id="oylikList" style="padding:14px"></div>
+        </div>
+      </div>
+
+      <!-- TAB: brigada -->
+      <div data-tabpanel="brigada" style="display:none">
+        <div class="card">
+          <div class="card-head"><h3>Brigadalararo o'tish tarixi</h3></div>
+          <div class="tbl-wrap">
+            <table>
+              <thead><tr><th>Sana</th><th>Brigada</th><th>Amal</th></tr></thead>
+              <tbody id="brigBody"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- TAB: patent -->
+      <div data-tabpanel="patent" style="display:none">
+        <div class="card">
+          <div class="card-head"><h3>Patent to'lovlar tarixi</h3></div>
+          <div class="tbl-wrap">
+            <table>
+              <thead><tr><th>Sana</th><th>Summa</th><th>Izoh</th></tr></thead>
+              <tbody id="patentBody"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<script src="assets/data.js"></script>
+<script src="assets/app.js"></script>
+<script>
+mountShell('ishchi','profil','Profilim',"Shaxsiy ma'lumotlar va hujjat muddatlari");
+
+const W = WORKERS[0]; // Sardor Tursunov
+
+/* doc countdown cards */
+const docs = [
+  { label:'Sertifikat',     muddat: W.sertifikat.muddat, extra:`Olingan: ${W.sertifikat.sana}` },
+  { label:'Patent muddati', muddat: W.patent.muddat,     extra:`Olingan: ${W.patent.sana}` },
+  { label:"Patent to'lovi", muddat: W.patent.tolovSana,  extra:`Oxirgi to'lov: 08.07.2026` },
+  { label:"Ro'yxatga olish",muddat: W.royxat.muddat,     extra:`Manzil: ${W.royxat.joy}` },
+];
+document.getElementById('docGrid').innerHTML = docs.map(d => {
+  const n = daysLeft(d.muddat);
+  const barColor = n<0 ? 'var(--rust)' : n<=7 ? 'var(--rust)' : n<=20 ? 'var(--amber)' : 'var(--moss)';
+  const pct = Math.max(0, Math.min(100, (n/(365))*100));
+  return `<div class="stat">
+    <div class="bar" style="background:${barColor}"></div>
+    <div class="lbl">${d.label}</div>
+    <div style="margin:10px 0 6px">${chipForDays(d.muddat,'Muddat')}</div>
+    <div class="progress" style="margin-bottom:6px"><span style="width:${pct}%;background:${barColor}"></span></div>
+    <div style="font-size:11px;color:var(--steel-3)">${d.extra}</div>
+  </div>`;
+}).join('');
+
+document.getElementById('royxatChip').innerHTML = chipForDays(W.royxat.muddat,'Muddat');
+
+/* attendance table */
+function renderAtt(){
+  const rows = ATTENDANCE_HISTORY;
+  let totalH = 0, absent = 0;
+  document.getElementById('attBody').innerHTML = rows.map(r => {
+    if(r.holat==='keldi') totalH += r.soat; else absent++;
+    const icon = r.holat==='keldi'
+      ? `<span class="chip"><span class="dot"></span>${r.soat} soat</span>`
+      : `<span class="chip danger"><span class="dot"></span>Kelmadi</span>`;
+    return `<tr>
+      <td class="mono">${r.sana}</td>
+      <td>Aziz Karimov brigadasi</td>
+      <td class="mono">${r.holat==='keldi' ? r.soat+' soat' : '—'}</td>
+      <td>${icon}</td>
+    </tr>`;
+  }).join('');
+  document.getElementById('totalDays').textContent = rows.filter(r=>r.holat==='keldi').length;
+  document.getElementById('totalHours').textContent = totalH;
+  document.getElementById('absentDays').textContent = absent;
+}
+renderAtt();
+
+/* salary history — expandable rows */
+document.getElementById('oylikList').innerHTML = W.oylikTarixi.length
+  ? W.oylikTarixi.map((o,i) => `
+  <div class="pay-row" id="pay-${i}">
+    <div class="pay-head" onclick="togglePay(${i})" style="cursor:pointer">
+      <div>
+        <div style="font-weight:600;font-size:13.5px">${o.sana} — <span class="mono">${money(o.jami)} ₽</span></div>
+        <div style="font-size:12px;color:var(--steel-3);margin-top:3px">${o.izoh}</div>
+      </div>
+      <div style="display:flex;gap:8px;align-items:center;flex-shrink:0">
+        ${o.qarzUshlandi ? `<span class="chip danger"><span class="dot"></span>Qarz: ${money(o.qarzUshlandi)}</span>` : ''}
+        <span class="chip moss" style="background:var(--moss-bg);color:var(--moss)">
+          <span class="dot"></span>Qo'lga: ${money(o.qolgan)} ₽
+        </span>
+        <span style="color:var(--steel-3);font-size:18px;line-height:1" id="payArrow-${i}">›</span>
+      </div>
+    </div>
+    <div class="pay-detail" id="payDetail-${i}">
+      <div class="grid g-3">
+        <div><div class="lbl" style="font-size:10px">Jami hisoblangan</div><div class="mono fw6">${money(o.jami)} ₽</div></div>
+        <div><div class="lbl" style="font-size:10px">Qarzga ushlandi</div><div class="mono fw6 txt-rust">${money(o.qarzUshlandi)} ₽</div></div>
+        <div><div class="lbl" style="font-size:10px">Qo'lga tegdi</div><div class="mono fw6 txt-moss">${money(o.qolgan)} ₽</div></div>
+      </div>
+    </div>
+  </div>`).join('')
+  : '<div class="empty">Oylik tarixi yo\'q</div>';
+
+function togglePay(i){
+  const row = document.getElementById('pay-'+i);
+  const arrow = document.getElementById('payArrow-'+i);
+  row.classList.toggle('open');
+  arrow.textContent = row.classList.contains('open') ? '˅' : '›';
+}
+
+/* brigade history */
+document.getElementById('brigBody').innerHTML = W.brigadaTarixi.map(r => `
+  <tr>
+    <td class="mono">${r.sana}</td>
+    <td>${r.brigada}</td>
+    <td><span class="id-tag ${r.amal.includes('qabul')?'moss':'amber'}">${r.amal}</span></td>
+  </tr>`).join('');
+
+/* patent payments */
+document.getElementById('patentBody').innerHTML = W.patent.tolovlar && W.patent.tolovlar.length
+  ? W.patent.tolovlar.map(p => `
+  <tr>
+    <td class="mono">${p.sana}</td>
+    <td class="mono">${money(p.summa)} ₽</td>
+    <td style="color:var(--steel-3);font-size:12px">Ayliq patent to'lovi</td>
+  </tr>`).join('')
+  : '<tr><td colspan="3" style="text-align:center;color:var(--steel-3)">To\'lovlar yo\'q</td></tr>';
+
+/* tab init */
+initTabs('mainTabs', 'davomat');
+
+/* photo upload */
+document.getElementById('photoInput').addEventListener('change', e => {
+  const f = e.target.files[0];
+  if(!f) return;
+  const url = URL.createObjectURL(f);
+  const av = document.getElementById('avatarBox');
+  av.style.backgroundImage = `url(${url})`;
+  av.style.backgroundSize = 'cover';
+  av.textContent = '';
+  toast("Rasm saqlandi ✓");
+});
+</script>
+</body>
+</html>

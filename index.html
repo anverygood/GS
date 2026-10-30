@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Tizimga kirish — Qurilish Nazorat</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="assets/style.css">
+  <style>
+    body{
+      min-height:100vh;display:grid;place-items:center;padding:24px;
+      background:var(--steel);
+      background-image:radial-gradient(circle at 1px 1px,rgba(255,255,255,.07) 1px,transparent 0);
+      background-size:22px 22px;
+    }
+    .login-layout{
+      display:grid;grid-template-columns:1fr 1fr;width:min(900px,100%);min-height:510px;
+      overflow:hidden;border-radius:16px;background:var(--card);box-shadow:0 24px 70px rgba(0,0,0,.25);
+    }
+    .login-intro{
+      display:flex;flex-direction:column;justify-content:space-between;padding:38px;
+      color:#fff;background:linear-gradient(145deg,var(--steel),#3b505a);
+    }
+    .login-brand{display:flex;align-items:center;gap:14px}
+    .login-mark{
+      display:grid;place-items:center;width:48px;height:48px;flex:none;
+      color:var(--steel);background:var(--amber);font:700 20px Oswald,sans-serif;
+      transform:rotate(-3deg);
+    }
+    .login-brand h1{font-size:20px}
+    .login-brand p{margin:3px 0 0;color:var(--amber);font-size:11px;letter-spacing:.1em;text-transform:uppercase}
+    .intro-copy{max-width:330px}
+    .intro-copy .eyebrow{color:var(--amber);font:500 11px 'IBM Plex Mono',monospace;letter-spacing:.12em;text-transform:uppercase}
+    .intro-copy h2{margin:10px 0;font-size:32px;line-height:1.15}
+    .intro-copy p{color:rgba(255,255,255,.7);line-height:1.7}
+    .intro-note{font-size:11px;color:rgba(255,255,255,.5)}
+    .login-form-wrap{display:flex;align-items:center;padding:42px}
+    .login-form{width:100%;max-width:360px;margin:auto}
+    .login-form h2{font-size:24px;margin-bottom:6px}
+    .login-form .lead{margin:0 0 26px;color:var(--steel-3);font-size:13px}
+    .login-form .btn{width:100%;margin-top:4px;padding:12px}
+    .demo-note{
+      margin-top:18px;padding:11px 12px;border-radius:8px;
+      background:#fbeed8;color:#80520f;font-size:11.5px;line-height:1.55;
+    }
+    @media(max-width:680px){
+      body{padding:14px}
+      .login-layout{grid-template-columns:1fr;min-height:auto}
+      .login-intro{min-height:190px;padding:24px}
+      .intro-copy{margin-top:28px}
+      .intro-copy h2{font-size:24px}
+      .intro-copy p,.intro-note{display:none}
+      .login-form-wrap{padding:28px 22px}
+    }
+  </style>
+</head>
+<body>
+  <main class="login-layout">
+    <section class="login-intro" aria-label="Loyiha haqida">
+      <div class="login-brand">
+        <div class="login-mark">QN</div>
+        <div>
+          <h1>Qurilish Nazorat</h1>
+          <p>Brigada va ishchi boshqaruvi</p>
+        </div>
+      </div>
+      <div class="intro-copy">
+        <div class="eyebrow">Boshqaruv tizimi</div>
+        <h2>Ish jarayoni — bir joyda.</h2>
+        <p>Davomat, hisobotlar va ishchilar haqidagi ma'lumotlarni qulay boshqaring.</p>
+      </div>
+      <div class="intro-note">Demo versiya · Ma'lumotlar serverga yuborilmaydi</div>
+    </section>
+
+    <section class="login-form-wrap">
+      <form class="login-form" id="loginForm">
+        <h2>Tizimga kirish</h2>
+        <p class="lead">Davom etish uchun ma'lumotlarni kiriting.</p>
+        <div class="field">
+          <label for="username">Login</label>
+          <input id="username" name="username" type="text" autocomplete="username" placeholder="Loginni kiriting" required>
+        </div>
+        <div class="field">
+          <label for="password">Parol</label>
+          <input id="password" name="password" type="password" autocomplete="current-password" placeholder="Parolni kiriting" required>
+        </div>
+        <div class="field">
+          <label for="role">Lavozim</label>
+          <select id="role" name="role" required>
+            <option value="ishchi">Ishchi</option>
+            <option value="brigadir" selected>Brigadir</option>
+            <option value="buxgalter">Buxgalter</option>
+            <option value="hr">HR menejer</option>
+            <option value="ceo">CEO</option>
+            <option value="omborchi">Omborchi</option>
+          </select>
+        </div>
+        <button class="btn amber" type="submit">Kirish →</button>
+        <div class="demo-note">
+          Bu hozircha demo kirish sahifasi: login va parol tekshirilmaydi. Haqiqiy autentifikatsiya uchun server tomoni kerak bo'ladi.
+        </div>
+      </form>
+    </section>
+  </main>
+  <script>
+    const rolePages = {
+      ishchi:'ishchi.html',
+      brigadir:'brigadir.html',
+      buxgalter:'buxgalter.html',
+      hr:'hr.html',
+      ceo:'ceo.html',
+      omborchi:'omborchi.html'
+    };
+    document.getElementById('loginForm').addEventListener('submit', event => {
+      event.preventDefault();
+      const role = document.getElementById('role').value;
+      sessionStorage.setItem('qnRole', role);
+      window.location.href = rolePages[role];
+    });
+  </script>
+</body>
+</html>

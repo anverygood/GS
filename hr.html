@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ishchilar — Qurilish Nazorat</title>
+  <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="assets/style.css">
+  <link rel="stylesheet" href="assets/qn.css">
+  <style>
+    .worker-filters{
+      display:grid;grid-template-columns:minmax(220px,2fr) repeat(3,minmax(150px,1fr)) auto;
+      gap:10px;align-items:end;
+    }
+    .worker-filters .field{margin:0}
+    .worker-results{padding:10px 16px;color:var(--steel-3);font-size:12px}
+    .worker-row{cursor:pointer;transition:background .12s}
+    .worker-row:hover{background:rgba(240,166,58,.08)}
+    .worker-link{color:var(--steel);text-decoration:none}
+    .worker-link:hover{color:var(--amber-dark);text-decoration:underline}
+    .stage-steps{display:flex;flex-wrap:wrap;gap:5px;min-width:310px}
+    .stage-pill{
+      display:inline-flex;align-items:center;gap:4px;padding:4px 7px;
+      border:1px solid var(--line);border-radius:99px;background:var(--card);
+      color:var(--steel-3);font:500 10px 'IBM Plex Sans',sans-serif;cursor:pointer;
+    }
+    .stage-pill span{
+      display:grid;place-items:center;width:15px;height:15px;border-radius:50%;
+      background:var(--paper-2);font:500 9px 'IBM Plex Mono',monospace;
+    }
+    .stage-pill.complete{border-color:#b7d0b8;background:var(--moss-bg);color:var(--moss)}
+    .stage-pill.complete span{background:var(--moss);color:#fff}
+    .stage-pill.selected{outline:2px solid var(--amber-dark);outline-offset:1px}
+    .stage-progress{margin-top:5px;color:var(--steel-3);font-size:10px}
+    .stage-detail td{white-space:normal;background:#f8f5ed;padding:0}
+    .stage-explainer{padding:15px 18px;border-left:3px solid var(--amber)}
+    .stage-explainer-head{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+    .stage-explainer p{margin:7px 0;color:var(--steel-3);font-size:12px}
+    .stage-values{display:flex;flex-wrap:wrap;gap:8px 18px;margin-bottom:12px;font-size:12px}
+    .empty-cell{text-align:center;padding:24px;color:var(--steel-3)}
+    @media(max-width:950px){
+      .worker-filters{grid-template-columns:repeat(2,minmax(0,1fr))}
+      .worker-filters .field:first-child{grid-column:1/-1}
+    }
+    @media(max-width:600px){
+      .worker-filters{grid-template-columns:1fr}
+      .worker-filters .field:first-child{grid-column:auto}
+      .worker-filters .btn{width:100%}
+      .stage-steps{min-width:290px}
+    }
+  </style>
+</head>
+<body>
+  <div class="shell">
+    <div id="sidebarSlot"></div>
+    <main class="main">
+      <div id="topbarSlot"></div>
+      <div class="content">
+        <section class="grid g-3 mb-26" id="stats" aria-label="Ishchilar holati"></section>
+
+        <section id="royxat" style="scroll-margin-top:70px">
+          <div class="section-lbl">Ishchilar ro'yxati</div>
+          <div class="card mb-26">
+            <div class="card-body">
+              <div class="worker-filters">
+                <div class="field">
+                  <label for="workerSearch">Ism, familiya yoki pasport</label>
+                  <input id="workerSearch" type="search" placeholder="Masalan: Anvar yoki AB1234567">
+                </div>
+                <div class="field">
+                  <label for="countryFilter">Davlati</label>
+                  <select id="countryFilter"><option value="">Barcha davlatlar</option></select>
+                </div>
+                <div class="field">
+                  <label for="brigadeFilter">Brigadasi</label>
+                  <select id="brigadeFilter"><option value="">Barcha brigadalar</option></select>
+                </div>
+                <div class="field">
+                  <label for="statusFilter">Ish holati</label>
+                  <select id="statusFilter">
+                    <option value="active">Faol ishchilar</option>
+                    <option value="working">Ishlayapti</option>
+                    <option value="process">Hujjat jarayonida</option>
+                    <option value="history">Ishdan ketganlar</option>
+                    <option value="deleted">Arxivlanganlar</option>
+                    <option value="all">Barcha holatlar</option>
+                  </select>
+                </div>
+                <button class="btn ghost" type="button" onclick="resetWorkerFilters()">Filtrlarni tozalash</button>
+              </div>
+            </div>
+            <div class="worker-results" id="resultCount" aria-live="polite"></div>
+            <div class="tbl-wrap" style="border:none">
+              <table style="width:100%;min-width:740px">
+                <thead>
+                  <tr><th>Ishchi</th><th>Bosqichlar — tafsilot uchun bosing</th><th>Brigada</th><th>Holati</th></tr>
+                </thead>
+                <tbody id="tb"></tbody>
+              </table>
+            </div>
+          </div>
+        </section>
+      </div>
+    </main>
+  </div>
+  <script src="assets/data.js"></script>
+  <script src="assets/app.js"></script>
+  <script src="assets/qn.js"></script>
+  <script src="assets/hr.js"></script>
+  <script>
+    render();demo();mountShell('hr','royxat','Ishchilar','Qidiruv, hujjat bosqichlari va ishchi profillari');
+  </script>
+</body>
+</html>

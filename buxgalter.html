@@ -1,0 +1,581 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Buxgalteriya — Qurilish Nazorat</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Oswald:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/style.css">
+<style>
+/* ===== TOP BAR ===== */
+.topbar {
+  background: linear-gradient(135deg, #8F9A97 0%, #8F9A97 100%);
+  border-bottom: none;
+  padding: 14px 20px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.12);
+  color: white;
+}
+.topbar-left { display: flex; align-items: center; gap: 16px; }
+.topbar-right { display: flex; align-items: center; gap: 12px; }
+
+.month-selector {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 500;
+  font-size: 14px;
+  color: white;
+}
+.month-selector button {
+  background: rgba(255,255,255,0.2);
+  border: none;
+  width: 32px;
+  height: 32px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all .2s;
+  color: white;
+}
+.month-selector button:hover { background: rgba(255,255,255,0.3); }
+
+.icon-btn {
+  background: transparent;
+  border: none;
+  width: 36px;
+  height: 36px;
+  border-radius: 6px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+  transition: all .2s;
+  position: relative;
+  color: white;
+}
+.icon-btn:hover { background: rgba(255,255,255,0.1); }
+
+.profile-section {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 4px 12px;
+  border-radius: 6px;
+  background: rgba(255,255,255,0.15);
+  color: white;
+}
+.profile-section .avatar { width: 32px; height: 32px; }
+.profile-info { font-size: 12px; }
+.profile-info .name { font-weight: 600; color: white; }
+.profile-info .role { color: rgba(255,255,255,0.8); font-size: 11px; }
+
+/* ===== DASHBOARD STATS ===== */
+.dashboard-header {
+  margin-bottom: 20px;
+}
+.dashboard-header h2 {
+  font-size: 20px;
+  margin-bottom: 4px;
+  color: var(--fg);
+}
+.dashboard-header p {
+  font-size: 12px;
+  color: var(--steel-3);
+}
+
+.stat-cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 14px;
+  margin-bottom: 26px;
+}
+.stat-card {
+  background: var(--bg-alt);
+  border: 1px solid var(--line-soft);
+  border-radius: 8px;
+  padding: 16px;
+  position: relative;
+  overflow: hidden;
+}
+.stat-card.primary { background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%); color: white; border: none; }
+.stat-card.rust { background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%); color: white; border: none; }
+.stat-card.moss { background: linear-gradient(135deg, #16a34a 0%, #15803d 100%); color: white; border: none; }
+
+.stat-card::before {
+  content: '';
+  position: absolute;
+  top: -50%;
+  right: -50%;
+  width: 200px;
+  height: 200px;
+  background: rgba(255,255,255,0.1);
+  border-radius: 50%;
+}
+.stat-card-label { font-size: 11px; text-transform: uppercase; letter-spacing: .08em; opacity: .8; margin-bottom: 8px; font-weight: 600; }
+.stat-card-value { font-size: 24px; font-weight: 700; margin-bottom: 4px; font-family: 'IBM Plex Mono'; }
+.stat-card-sub { font-size: 12px; opacity: .7; }
+
+/* ===== BRIGADLAR GRID ===== */
+.brig-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; }
+@media(max-width:1040px) { .brig-grid { grid-template-columns: repeat(2, 1fr); } }
+@media(max-width:500px) { .brig-grid { grid-template-columns: 1fr 1fr; gap: 8px; } }
+
+.filter-bar { display: flex; gap: 8px; flex-wrap: wrap; padding: 14px 18px; border-bottom: 1px solid var(--line-soft); }
+.filter-bar input, .filter-bar select { width: auto; flex: 1; min-width: 120px; max-width: 220px; }
+
+.pay-btn {
+  border: none;
+  background: var(--moss);
+  color: #fff;
+  border-radius: 6px;
+  padding: 6px 14px;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all .2s;
+}
+.pay-btn:hover { background: #15803d; }
+.pay-btn:disabled { opacity: .4; cursor: default; }
+
+/* ===== BRIGADLAR DETAIL SAHIFA ===== */
+#brigadaDetailView {
+  animation: slideIn .3s ease;
+}
+@keyframes slideIn {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@media(max-width: 768px) {
+  .side-panel { width: 100%; right: -100%; }
+  .stat-cards { grid-template-columns: 1fr; }
+  .brig-grid { grid-template-columns: repeat(2, 1fr); }
+  .topbar { flex-wrap: wrap; }
+  .topbar-left, .topbar-right { width: 100%; }
+}
+</style>
+</head>
+<body>
+<div class="shell">
+  <div id="sidebarSlot"></div>
+  <div class="main">
+    <!-- TOP BAR -->
+    <div class="topbar">
+      <div class="topbar-left">
+        <div class="month-selector">
+          <button onclick="prevMonth()">‹</button>
+          <span id="currentMonth" style="min-width: 140px;">Avgust 2026</span>
+          <button onclick="nextMonth()">›</button>
+        </div>
+      </div>
+      <div class="topbar-right">
+        <button class="icon-btn" onclick="toggleDarkMode()" title="Tungi mode">🌙</button>
+      </div>
+    </div>
+    
+    <div id="topbarSlot"></div>
+    <div class="content">
+
+      <!-- BRIGADLAR GRID VIEW -->
+      <div id="brigadlarView" style="display:block">
+        <div id="dashboard" style="margin-bottom: 26px;">
+          <div class="dashboard-header">
+            <h2>Moliya dashboard</h2>
+            <p id="dashPeriod">Iyul 2026 oyi statistikasi</p>
+          </div>
+          
+          <div class="stat-cards">
+            <div class="stat-card primary">
+              <div class="stat-card-label">Jami to'lanadigan summa</div>
+              <div class="stat-card-value" id="statToPay">56.2M</div>
+              <div class="stat-card-sub">Bu oy uchun</div>
+            </div>
+            <div class="stat-card rust">
+              <div class="stat-card-label">Jami qarz</div>
+              <div class="stat-card-value" id="statDebtTotal">250K</div>
+              <div class="stat-card-sub" id="statDebtCount">22 ta ishchi</div>
+            </div>
+            <div class="stat-card moss">
+              <div class="stat-card-label">Qarz keyin to'lanadigan</div>
+              <div class="stat-card-value" id="statNetPay">56.0M</div>
+              <div class="stat-card-sub">Haqiqiy to'lanadigan summa</div>
+            </div>
+            <div class="stat-card" style="background: linear-gradient(135deg, #8b5cf6 0%, #a78bfa 100%); color: white; border: none;">
+              <div class="stat-card-label">Ishchilar soni</div>
+              <div class="stat-card-value" id="statWorkerCount">125</div>
+              <div class="stat-card-sub" id="statBrigCount">8 ta brigadda</div>
+            </div>
+          </div>
+        </div>
+
+        <div id="brigadlar">
+          <div class="section-lbl">Brigadlar — Barcha brigadata</div>
+          <div class="brig-grid mb-26" id="brigGrid"></div>
+        </div>
+
+        <!-- BARCHA ISHCHILAR -->
+        <div id="ishchilar" style="scroll-margin-top:70px;margin-bottom:26px">
+          <div class="section-lbl">Barcha ishchilar</div>
+          <div class="card">
+            <div class="filter-bar">
+              <input type="text" id="allSearch" placeholder="Ism, familya, pasport...">
+              <select id="allBrig"><option value="">Barcha brigadlar</option></select>
+              <select id="allCountry"><option value="">Barcha davlatlar</option></select>
+              <select id="allPaid">
+                <option value="">Oylik: hammasi</option>
+                <option value="olgan">Oylik olgan</option>
+                <option value="olmagan">Oylik olmagan</option>
+              </select>
+            </div>
+            <div class="tbl-wrap" style="border:none">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Ishchi</th>
+                    <th class="hide-mobile">Brigada</th>
+                    <th class="hide-mobile">Davlat</th>
+                    <th>Oxirgi oylik</th>
+                    <th>Sana</th>
+                    <th>Qarzi</th>
+                    <th>Holat</th>
+                  </tr>
+                </thead>
+                <tbody id="allBody"></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <!-- QARZ STATISTIKA -->
+        <div id="qarz" style="scroll-margin-top:70px;margin-bottom:26px">
+          <div class="section-lbl">Qarz statistikasi</div>
+          <div class="grid g-3 stat-row mb-26">
+            <div class="stat rust"><div class="bar"></div><div class="num" id="statTotalDebt">—</div><div class="lbl">Jami qarz (₽)</div></div>
+            <div class="stat"><div class="bar"></div><div class="num" id="statGross">—</div><div class="lbl">Berilishi kerak bo'lgan</div></div>
+            <div class="stat moss"><div class="bar"></div><div class="num" id="statNet">—</div><div class="lbl">Qarz olindikdan keyin</div></div>
+          </div>
+          <div class="card">
+            <div class="card-head"><h3>Eng qarzli ishchilar</h3></div>
+            <div class="tbl-wrap" style="border:none">
+              <table>
+                <thead><tr><th>#</th><th>Ishchi</th><th>Brigada</th><th>Qarz miqdori</th><th>Ulushi</th></tr></thead>
+                <tbody id="debtRank"></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <!-- CHEK TO'LOVLAR -->
+        <div id="oylik" style="scroll-margin-top:70px">
+          <div class="section-lbl">Chek to'lovlar tarixi (HR tomonidan)</div>
+          <div class="card">
+            <div class="tbl-wrap" style="border:none">
+              <table>
+                <thead><tr><th>Oy</th><th>To'langan sana</th><th>Summa</th><th>Holat</th></tr></thead>
+                <tbody id="chekBody"></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- BRIGADA DETAIL VIEW -->
+      <div id="brigadaDetailView" style="display:none;scroll-margin-top:0">
+        <div style="padding: 20px 0; margin-bottom: 20px;">
+          <button onclick="closeBrigadaDetail()" style="background: transparent; border: none; font-size: 16px; cursor: pointer; color: var(--steel-3);">← Orqaga</button>
+        </div>
+        <div class="card" style="margin-bottom: 26px;">
+          <div class="card-head" style="flex-wrap:wrap;gap:10px">
+            <div>
+              <h2 id="detailTitle" style="margin:0">—</h2>
+              <div style="font-size:12px;color:var(--steel-3);margin-top:3px" id="detailSub">—</div>
+            </div>
+          </div>
+          <div style="display:flex;gap:20px;padding:12px 18px;border-bottom:1px solid var(--line-soft);flex-wrap:wrap">
+            <div><div class="lbl" style="font-size:10px">Jami qarz</div><div class="mono fw6 txt-rust" id="sumDebt">—</div></div>
+            <div><div class="lbl" style="font-size:10px">Berilishi kerak (qarzsiz)</div><div class="mono fw6" id="sumGross">—</div></div>
+            <div><div class="lbl" style="font-size:10px">Qarz olindikdan keyin</div><div class="mono fw6 txt-moss" id="sumNet">—</div></div>
+          </div>
+          <div class="tbl-wrap" style="border:none">
+            <table>
+              <thead>
+                <tr>
+                  <th>Ishchi</th>
+                  <th>Ish soati</th>
+                  <th class="hide-mobile">Davlat</th>
+                  <th>Qarzi</th>
+                  <th>Uzish</th>
+                  <th>Qoladigan qarz</th>
+                  <th>Oylik</th>
+                </tr>
+              </thead>
+              <tbody id="detailBody"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<script src="assets/data.js"></script>
+<script src="assets/app.js"></script>
+<script>
+mountShell('buxgalter','brigadlar','Buxgalteriya',"Brigadlar bo'yicha qarz va oylik hisob-kitobi");
+
+// Month state
+let currentMonth = new Date(2026, 7); // August 2026
+function updateMonthDisplay(){
+  const months = ['Yanvar','Fevral','Mart','Aprel','May','Iyun','Iyul','Avgust','Sentyabr','Oktyabr','Noyabr','Dekabr'];
+  const month = months[currentMonth.getMonth()];
+  const year = currentMonth.getFullYear();
+  document.getElementById('currentMonth').textContent = month + ' ' + year;
+  document.getElementById('dashPeriod').textContent = month + ' ' + year + ' oyi statistikasi';
+}
+function prevMonth(){ currentMonth.setMonth(currentMonth.getMonth() - 1); updateMonthDisplay(); renderDashboard(); }
+function nextMonth(){ currentMonth.setMonth(currentMonth.getMonth() + 1); updateMonthDisplay(); renderDashboard(); }
+updateMonthDisplay();
+
+// Dark mode with localStorage
+function toggleDarkMode(){
+  const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+  const newTheme = isDark ? 'light' : 'dark';
+  document.documentElement.setAttribute('data-theme', newTheme);
+  localStorage.setItem('theme', newTheme);
+}
+// Load theme from localStorage
+const savedTheme = localStorage.getItem('theme') || 'light';
+document.documentElement.setAttribute('data-theme', savedTheme);
+
+// Brigadla detail sahifasiga o'tish
+function openBrigadaDetail(brigId){
+  activeBrig = brigId;
+  document.getElementById('brigadlarView').style.display = 'none';
+  document.getElementById('brigadaDetailView').style.display = 'block';
+  window.scrollTo(0, 0);
+  
+  const b = BRIGADES.find(x=>x.id===brigId);
+  document.getElementById('detailTitle').textContent = b.name + ' brigadasi';
+  document.getElementById('detailSub').textContent = b.obj;
+  renderDetail();
+}
+
+// Brigadlar sahifasiga qaytish
+function closeBrigadaDetail(){
+  document.getElementById('brigadlarView').style.display = 'block';
+  document.getElementById('brigadaDetailView').style.display = 'none';
+  activeBrig = null;
+  window.scrollTo(0, 0);
+}
+
+// mutable worker state for demo - with hourly rate and hours
+let ws = WORKERS.map(w => ({
+  ...w, 
+  payInput: 0, 
+  paid: false,
+  hourlyRate: 520,      // rubl per hour
+  workHours: 180,       // hours per month
+  hoursWorked: 180      // actual hours worked
+}));
+
+/* ---- DASHBOARD ---- */
+function renderDashboard(){
+  // Calculate totals
+  const totalWorkers = ws.length;
+  const totalBrigades = BRIGADES.length;
+  const totalDebt = ws.reduce((s,w)=>s+w.qarz,0);
+  const totalGross = ws.length * 160000; // 160K sum per worker
+  const totalNet = totalGross - totalDebt;
+  const debtorCount = ws.filter(w=>w.qarz>0).length;
+  
+  document.getElementById('statToPay').textContent = money(totalGross);
+  document.getElementById('statDebtTotal').textContent = money(totalDebt);
+  document.getElementById('statDebtCount').textContent = debtorCount + ' ta ishchi';
+  document.getElementById('statNetPay').textContent = money(totalNet);
+  document.getElementById('statWorkerCount').textContent = totalWorkers;
+  document.getElementById('statBrigCount').textContent = totalBrigades + ' ta brigadda';
+}
+renderDashboard();
+
+/* ---- BRIG GRID ---- */
+function renderBrigGrid(){
+  document.getElementById('brigGrid').innerHTML = BRIGADES.map(b => {
+    const bw = ws.filter(w => w.brigade === b.id);
+    const debt = bw.reduce((s,w)=>s+w.qarz,0);
+    const paid = bw.filter(w=>w.paid).length;
+    const grossForBrig = bw.length * 160000;
+    const netForBrig = grossForBrig - debt;
+    return `<div class="brig-tile" onclick="openBrigadaDetail('${b.id}')">
+      <div class="tag-corner">${bw.length} kishi</div>
+      <div style="font-size:10px;text-transform:uppercase;letter-spacing:.09em;color:var(--steel-3);margin-bottom:6px">Brigada</div>
+      <h3 style="font-size:15px">${b.name}</h3>
+      <div style="font-size:12px;color:var(--steel-3);margin:4px 0 10px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${b.obj}</div>
+      <div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:6px">
+        <span style="color:var(--steel-3)">Qarz / To'lash</span>
+        <span class="mono fw6"><span class="txt-rust">${money(debt)}</span> / <span class="txt-moss">${money(netForBrig)}</span> ₽</span>
+      </div>
+      <div class="progress ${debt>0?'rust':'moss'}">
+        <span style="width:${Math.min(100,(paid/bw.length)*100).toFixed(0)}%"></span>
+      </div>
+      <div style="font-size:11px;color:var(--steel-3);margin-top:5px">${paid}/${bw.length} kishi oylik oldi</div>
+    </div>`;
+  }).join('');
+}
+renderBrigGrid();
+
+function renderDetail(){
+  if(!activeBrig) return;
+  const q = (document.getElementById('detailSearch')?.value||'').toLowerCase();
+  const rows = ws.filter(w => w.brigade===activeBrig && (w.ism+' '+w.fam).toLowerCase().includes(q));
+  const grossPerWorker = 160000;
+  const totalDebt = rows.reduce((s,w)=>s+w.qarz,0);
+  const totalGross = rows.length * grossPerWorker;
+  const totalNet = totalGross - totalDebt;
+  document.getElementById('sumDebt').textContent = money(totalDebt)+' ₽';
+  document.getElementById('sumGross').textContent = money(totalGross)+' ₽';
+  document.getElementById('sumNet').textContent = money(totalNet)+' ₽';
+
+  document.getElementById('detailBody').innerHTML = rows.map(w => {
+    const rem = Math.max(0, w.qarz - (w.payInput||0));
+    const toGive = grossPerWorker - Math.min(w.qarz, w.payInput||0);
+    return `<tr style="${w.paid?'opacity:.55':''}">
+      <td style="display:flex;align-items:center;gap:8px">
+        <div class="avatar sm" style="background:${avatarColor(w.id)}">${initials(w.ism,w.fam)}</div>
+        <div>
+          <div style="font-weight:600;font-size:13px">${w.ism} ${w.fam}</div>
+          <div style="font-size:11px;color:var(--steel-3)">${w.country}</div>
+        </div>
+      </td>
+      <td class="mono">180 s</td>
+      <td class="hide-mobile">${w.country}</td>
+      <td class="mono ${w.qarz>0?'txt-rust':''} fw6">${money(w.qarz)}</td>
+      <td>
+        <input type="number" class="hrs-input" style="width:90px" placeholder="0" 
+          value="${w.payInput||''}" ${w.qarz<=0||w.paid?'disabled':''}
+          oninput="ws.find(x=>x.id==='${w.id}').payInput=parseFloat(this.value)||0; refreshRemaining('${w.id}')">
+      </td>
+      <td class="mono" id="rem-${w.id}">${money(rem)}</td>
+      <td>
+        ${!w.paid
+          ? `<button class="pay-btn" onclick="markPaid('${w.id}')" ${w.paid?'disabled':''}>Berildi ✓</button>`
+          : `<span class="chip moss" style="font-size:10px"><span class="dot"></span>Berildi</span>`}
+      </td>
+    </tr>`;
+  }).join('') || '<tr><td colspan="7" style="text-align:center;color:var(--steel-3);padding:20px">Ishchi topilmadi</td></tr>';
+}
+function refreshRemaining(id){
+  const w = ws.find(x=>x.id===id);
+  const rem = Math.max(0, w.qarz - (w.payInput||0));
+  const el = document.getElementById('rem-'+id);
+  if(el) el.textContent = money(rem);
+}
+function markPaid(id){
+  const w = ws.find(x=>x.id===id);
+  w.paid = true;
+  w.qarz = Math.max(0, w.qarz - (w.payInput||0));
+  renderDetail();
+  renderBrigGrid();
+  renderAllTable();
+  renderDebtStats();
+  toast(`${w.ism} ${w.fam} oylik oldi ✓`);
+}
+/* Search event listener - optional */
+const searchEl = document.getElementById('detailSearch');
+if(searchEl) searchEl.addEventListener('input', renderDetail);
+
+/* ---- ALL WORKERS TABLE ---- */
+BRIGADES.forEach(b => {
+  document.getElementById('allBrig').insertAdjacentHTML('beforeend',
+    `<option value="${b.id}">${b.name}</option>`);
+});
+COUNTRIES.forEach(c => {
+  document.getElementById('allCountry').insertAdjacentHTML('beforeend',
+    `<option value="${c}">${c}</option>`);
+});
+function renderAllTable(){
+  const q   = (document.getElementById('allSearch').value||'').toLowerCase();
+  const fb  = document.getElementById('allBrig').value;
+  const fc  = document.getElementById('allCountry').value;
+  const fp  = document.getElementById('allPaid').value;
+  const rows = ws.filter(w => {
+    if(q && !(w.ism+' '+w.fam+w.passport).toLowerCase().includes(q)) return false;
+    if(fb && w.brigade!==fb) return false;
+    if(fc && w.country!==fc) return false;
+    if(fp==='olgan' && !w.paid) return false;
+    if(fp==='olmagan' && w.paid) return false;
+    return true;
+  });
+  document.getElementById('allBody').innerHTML = rows.map(w => {
+    const hasSalary = w.oxirgiOylik > 0;
+    return `<tr>
+      <td style="display:flex;align-items:center;gap:8px">
+        <div class="avatar sm" style="background:${avatarColor(w.id)}">${initials(w.ism,w.fam)}</div>
+        <span style="font-weight:600">${w.ism} ${w.fam}</span>
+      </td>
+      <td class="hide-mobile">${brigName(w.brigade)}</td>
+      <td class="hide-mobile">${w.country}</td>
+      <td class="mono ${hasSalary?'':'txt-rust fw6'}">${hasSalary?money(w.oxirgiOylik)+' ₽':'Berilmagan'}</td>
+      <td class="mono">${w.oxirgiSana}</td>
+      <td class="mono ${w.qarz>0?'txt-rust fw6':''}">${money(w.qarz)} ₽</td>
+      <td>
+        ${w.paid
+          ? '<span class="chip"><span class="dot"></span>Oldi</span>'
+          : '<span class="chip warn"><span class="dot"></span>Olmagan</span>'}
+      </td>
+    </tr>`;
+  }).join('') || '<tr><td colspan="7" style="text-align:center;color:var(--steel-3);padding:20px">Natija yo\'q</td></tr>';
+}
+['allSearch','allBrig','allCountry','allPaid'].forEach(id =>
+  document.getElementById(id).addEventListener('input', renderAllTable));
+renderAllTable();
+
+/* ---- DEBT STATS ---- */
+function renderDebtStats(){
+  const td = ws.reduce((s,w)=>s+w.qarz,0);
+  const gr = ws.length * 160000;
+  document.getElementById('statTotalDebt').textContent = money(td)+' ₽';
+  document.getElementById('statGross').textContent = money(gr)+' ₽';
+  document.getElementById('statNet').textContent = money(gr-td)+' ₽';
+  renderDashboard();
+
+  const sorted = [...ws].filter(w=>w.qarz>0).sort((a,b)=>b.qarz-a.qarz).slice(0,6);
+  document.getElementById('debtRank').innerHTML = sorted.map((w,i) => `
+    <tr>
+      <td style="color:var(--steel-3);font-weight:700">${i+1}</td>
+      <td>${w.ism} ${w.fam}</td>
+      <td>${brigName(w.brigade)}</td>
+      <td class="mono txt-rust fw6">${money(w.qarz)} ₽</td>
+      <td style="width:120px">
+        <div class="progress rust"><span style="width:${Math.min(100,(w.qarz/td*100)).toFixed(0)}%"></span></div>
+        <div style="font-size:10px;color:var(--steel-3);margin-top:3px">${(w.qarz/td*100).toFixed(1)}%</div>
+      </td>
+    </tr>`).join('') || '<tr><td colspan="5" style="text-align:center;color:var(--steel-3)">Qarz yo\'q ✓</td></tr>';
+}
+renderDebtStats();
+
+/* ---- CHEKY ---- */
+document.getElementById('chekBody').innerHTML = CHEKY.map(c => `
+  <tr>
+    <td>${c.oy}</td>
+    <td class="mono">${c.sana}</td>
+    <td class="mono">${c.summa ? money(c.summa)+' rubl' : '—'}</td>
+    <td>${c.summa
+      ? '<span class="chip"><span class="dot"></span>To\'langan</span>'
+      : '<span class="chip warn"><span class="dot"></span>Kutilmoqda</span>'}</td>
+  </tr>`).join('');
+</script>
+</body>
+</html>

@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Brigadir — Qurilish Nazorat</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Oswald:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/style.css">
+<style>
+.att-card{
+  display:flex;align-items:center;gap:12px;padding:12px 16px;
+  border-bottom:1px solid var(--line-soft);
+}
+.att-card:last-child{border-bottom:none}
+.att-card .right{margin-left:auto;display:flex;align-items:center;gap:8px;flex-wrap:wrap;justify-content:flex-end;}
+.report-card{background:var(--paper-2);border-radius:8px;padding:12px 14px;margin-bottom:8px;display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;}
+.brigade-welcome{
+  display:flex;align-items:center;justify-content:space-between;gap:18px;flex-wrap:wrap;
+  padding:22px 24px;margin-bottom:22px;border-radius:12px;color:#fff;
+  background:linear-gradient(115deg,var(--steel),var(--steel-2));
+  box-shadow:var(--shadow);border-left:5px solid var(--amber);
+}
+.brigade-welcome h2{font-size:21px;margin-bottom:5px}
+.brigade-welcome p{margin:0;color:rgba(255,255,255,.72);font-size:13px;line-height:1.55}
+.brigade-welcome .btn{flex:none}
+@media(max-width:600px){.brigade-welcome{padding:18px}.brigade-welcome h2{font-size:18px}}
+</style>
+</head>
+<body>
+<div class="shell">
+  <div id="sidebarSlot"></div>
+  <div class="main">
+    <div id="topbarSlot"></div>
+    <div class="content">
+
+      <section class="brigade-welcome" aria-label="Brigada haqida">
+        <div>
+          <h2>Brigada boshqaruvi</h2>
+          <p>Davomatni belgilang, kunlik beton hisobotini yuboring va ishchilar holatini kuzating.</p>
+        </div>
+        <a class="btn amber" href="bildirishnomalar.html">Bildirishnomalarni ko'rish</a>
+      </section>
+
+      <!-- STAT ROW -->
+      <div class="grid g-4 stat-row mb-26">
+        <div class="stat"><div class="bar"></div><div class="num" id="stTotal">—</div><div class="lbl">Jami ishchilar</div></div>
+        <div class="stat moss"><div class="bar"></div><div class="num" id="stKeldi">—</div><div class="lbl">Bugun keldi</div></div>
+        <div class="stat rust"><div class="bar"></div><div class="num" id="stKelmadi">—</div><div class="lbl">Kelmadi</div></div>
+        <div class="stat"><div class="bar"></div><div class="num">340 m³</div><div class="lbl">Oy boshidan beton</div></div>
+      </div>
+
+      <!-- DAVOMAT -->
+      <div id="davomat" style="scroll-margin-top:70px;margin-bottom:24px">
+        <div class="section-lbl">Bugungi davomat — 13.08.2026</div>
+        <div class="card">
+          <div class="card-head" style="flex-wrap:wrap;gap:10px">
+            <h3>Ishchilar ro'yxati</h3>
+            <div style="display:flex;gap:8px;flex-wrap:wrap">
+              <input type="text" id="davSearch" placeholder="Qidiruv..." style="width:160px">
+              <button class="btn amber sm" onclick="saveAll()">Hammasini saqlash</button>
+            </div>
+          </div>
+          <div id="attList"></div>
+        </div>
+      </div>
+
+      <!-- KUNLIK HISOBOT -->
+      <div id="hisobot" style="scroll-margin-top:70px;margin-bottom:24px">
+        <div class="section-lbl">Kunlik ish hisoboti</div>
+        <div class="card">
+          <div class="card-body">
+            <div class="grid g-3">
+              <div class="field">
+                <label>Quyilgan beton (m³)</label>
+                <input type="number" id="m3Input" placeholder="masalan: 62" min="0" step="0.5">
+              </div>
+              <div class="field">
+                <label>Ob'ekt nomi</label>
+                <input type="text" id="obektInput" value="Yunusobod-14 turar-joy" readonly>
+              </div>
+              <div class="field">
+                <label>Yo'l xati (rasm)</label>
+                <input type="file" id="waybillInput" accept="image/*">
+              </div>
+            </div>
+            <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-top:4px">
+              <button class="btn amber" id="closeDayBtn" onclick="closeDay()">Kunni yopish</button>
+              <span id="dayStatus" style="font-size:12.5px;color:var(--steel-3)">
+                ⏱ 00:00 dan keyin kun avtomatik yopiladi va tahrirlanmaydi
+              </span>
+            </div>
+          </div>
+          <div style="border-top:1px solid var(--line-soft)">
+            <div class="section-lbl" style="padding:12px 18px 0;margin-bottom:0">So'nggi hisobotlar</div>
+            <div style="padding:0 18px 14px" id="reportList"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- O'TKAZISH / QABUL -->
+      <div id="otkazish" style="scroll-margin-top:70px;margin-bottom:24px">
+        <div class="section-lbl">O'tkazish va qabul qilish</div>
+        <div id="transferCards"></div>
+        <div class="card" style="margin-top:12px">
+          <div class="card-head"><h3>Ishchini boshqa brigadaga yuborish</h3></div>
+          <div class="card-body">
+            <div class="grid g-3">
+              <div class="field">
+                <label>Ishchi</label>
+                <select id="trWorker"></select>
+              </div>
+              <div class="field">
+                <label>Qaysi brigadaga</label>
+                <select id="trTarget"></select>
+              </div>
+              <div class="field">
+                <label>Izoh</label>
+                <input type="text" id="trNote" placeholder="Ixtiyoriy">
+              </div>
+            </div>
+            <button class="btn amber" onclick="sendTransfer()">Yuborish</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- ARXIV -->
+      <div id="arxiv" style="scroll-margin-top:70px">
+        <div class="section-lbl">Oylar arxivi</div>
+        <div class="card">
+          <div class="tbl-wrap" style="border:none">
+            <table>
+              <thead>
+                <tr>
+                  <th>Oy</th>
+                  <th>Ishchilar</th>
+                  <th>Jami beton</th>
+                  <th>Davomat</th>
+                  <th></th>
+                </tr>
+              </thead>
+              <tbody id="archiveBody"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<script src="assets/data.js"></script>
+<script src="assets/app.js"></script>
+<script>
+mountShell('brigadir','umumiy','Aziz Karimov brigadasi',"Yunusobod-14 turar-joy · 12 ishchi");
+
+const brigadeWorkers = WORKERS.filter(w => w.brigade === 'br1');
+const attState = {};
+brigadeWorkers.forEach(w => { attState[w.id] = { present: true, hours: 9 }; });
+
+/* ---- DAVOMAT ---- */
+function renderAtt(){
+  const q = (document.getElementById('davSearch').value||'').toLowerCase();
+  const rows = brigadeWorkers.filter(w => (w.ism+' '+w.fam).toLowerCase().includes(q));
+  document.getElementById('stTotal').textContent = brigadeWorkers.length;
+  document.getElementById('stKeldi').textContent = Object.values(attState).filter(s=>s.present).length;
+  document.getElementById('stKelmadi').textContent = Object.values(attState).filter(s=>!s.present).length;
+
+  document.getElementById('attList').innerHTML = rows.map(w => {
+    const s = attState[w.id];
+    const docWarn = daysLeft(w.sertifikat.muddat) <= 10 || daysLeft(w.patent.muddat) <= 10;
+    return `<div class="att-card">
+      <div class="avatar" style="background-color:${avatarColor(w.id)}">${initials(w.ism,w.fam)}</div>
+      <div style="min-width:0">
+        <div style="font-weight:600;font-size:13.5px">${w.ism} ${w.fam}
+          ${docWarn ? '<span class="chip danger" style="font-size:10px;padding:2px 7px;margin-left:6px"><span class="dot"></span>Hujjat!</span>' : ''}
+        </div>
+        <div style="font-size:11.5px;color:var(--steel-3)">${w.country} · <span class="mono">${w.passport}</span></div>
+      </div>
+      <div class="right">
+        <input type="number" class="hrs-input" step="0.5" min="0" max="24"
+          value="${s.hours}" ${!s.present?'disabled':''}
+          onchange="attState['${w.id}'].hours=parseFloat(this.value)||0"
+          title="Ish soati">
+        <div class="toggle-pa">
+          <button class="on-yes ${s.present?'active':''}" onclick="setPresent('${w.id}',true)">✓ Keldi</button>
+          <button class="on-no ${!s.present?'active':''}" onclick="setPresent('${w.id}',false)">✗ Kelmadi</button>
+        </div>
+      </div>
+    </div>`;
+  }).join('') || '<div class="empty">Ishchi topilmadi</div>';
+}
+function setPresent(id, val){
+  attState[id].present = val;
+  renderAtt();
+}
+function saveAll(){
+  toast("Barcha yozuvlar saqlandi ✓");
+}
+document.getElementById('davSearch').addEventListener('input', renderAtt);
+renderAtt();
+
+/* ---- HISOBOT ---- */
+document.getElementById('reportList').innerHTML = DAILY_REPORTS.map(r => `
+  <div class="report-card">
+    <div>
+      <span class="mono" style="font-weight:600">${r.sana}</span>
+      <span style="margin-left:12px;font-size:13px">${r.obekt}</span>
+    </div>
+    <div style="display:flex;gap:8px;align-items:center">
+      <span class="chip ${r.m3>0?'':'danger'}"><span class="dot"></span>${r.m3>0?r.m3+' m³':'Dam olish'}</span>
+      ${r.yolXat ? '<span class="id-tag moss" style="font-size:10px">Yo\'l xat ✓</span>' : '<span class="id-tag rust" style="font-size:10px">Yo\'l xat yo\'q</span>'}
+    </div>
+  </div>`).join('');
+
+let dayClosed = false;
+function closeDay(){
+  if(dayClosed) return;
+  const m3 = document.getElementById('m3Input').value;
+  if(!m3){ toast("Beton kubini kiriting!","warn"); return; }
+  dayClosed = true;
+  document.getElementById('m3Input').disabled = true;
+  document.getElementById('waybillInput').disabled = true;
+  document.getElementById('closeDayBtn').disabled = true;
+  document.getElementById('dayStatus').innerHTML =
+    '<span class="chip moss"><span class="dot"></span>Kun yopildi — tarixga saqlandi, tahrirlash mumkin emas</span>';
+  toast(`${m3} m³ beton yozildi. Kun yopildi ✓`);
+}
+
+/* ---- O'TKAZISH ---- */
+document.getElementById('transferCards').innerHTML = `
+  <div class="card" style="border-color:var(--amber-dark);margin-bottom:8px">
+    <div class="card-body" style="display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap">
+      <div style="display:flex;gap:12px;align-items:center">
+        <div class="avatar" style="background:#7a4c6a">BS</div>
+        <div>
+          <div style="font-weight:600">Bekzod Sodiqov</div>
+          <div style="font-size:12px;color:var(--steel-3);margin-top:2px">CEO tomonidan sizga yuborildi — Otabek Nazarov brigadasidan</div>
+          <div style="margin-top:6px">${chipForDays('2026-10-01','Sertifikat')} ${chipForDays('2026-08-30','Patent')}</div>
+        </div>
+      </div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap">
+        <button class="btn moss sm" onclick="acceptWorker(this)">✓ Qabul qilish</button>
+        <button class="btn ghost sm" onclick="showProfile(this)">Ko'rish</button>
+      </div>
+    </div>
+  </div>`;
+
+document.getElementById('trWorker').innerHTML = brigadeWorkers.map(w =>
+  `<option value="${w.id}">${w.ism} ${w.fam}</option>`).join('');
+document.getElementById('trTarget').innerHTML = BRIGADES.filter(b=>b.id!=='br1').map(b =>
+  `<option value="${b.id}">${b.name} brigadasi</option>`).join('');
+
+function acceptWorker(btn){
+  btn.closest('.card').style.borderColor = 'var(--moss)';
+  btn.closest('.card').querySelector('[style*="flex;gap:12px"]').insertAdjacentHTML('beforeend',
+    '<span class="chip" style="margin-top:8px"><span class="dot"></span>Qabul qilindi — brigadaga qo\'shildi</span>');
+  btn.closest('[style*="gap:8px"]').remove();
+  toast("Bekzod Sodiqov brigadaga qabul qilindi ✓");
+}
+function showProfile(btn){ toast("Profil sahifasiga o'tish...","warn"); }
+function sendTransfer(){
+  const wName = document.getElementById('trWorker').selectedOptions[0].text;
+  const tName = document.getElementById('trTarget').selectedOptions[0].text;
+  toast(`${wName} → ${tName} bildirishnoma yuborildi ✓`);
+}
+
+/* ---- ARXIV ---- */
+document.getElementById('archiveBody').innerHTML = ARCHIVE_MONTHS.map(m => `
+  <tr>
+    <td>${m.oy}</td>
+    <td class="mono">${m.ishchilar}</td>
+    <td class="mono">${m.beton} m³</td>
+    <td><span class="chip ${parseInt(m.davomat)>90?'':'warn'}"><span class="dot"></span>${m.davomat}</span></td>
+    <td><button class="btn ghost sm">Ko'rish</button></td>
+  </tr>`).join('');
+</script>
+</body>
+</html>

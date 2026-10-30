@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Bildirishnomalar — Qurilish Nazorat</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="assets/style.css">
+  <style>
+    .notice-summary{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px;margin-bottom:22px}
+    .notice-summary .stat .lbl{letter-spacing:.06em}
+    .notice-toolbar{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}
+    .notice-filters{display:flex;gap:8px;flex-wrap:wrap}
+    .notice-filter{
+      border:1px solid var(--line);border-radius:99px;background:var(--card);
+      color:var(--steel-3);padding:7px 12px;font:600 12px 'IBM Plex Sans',sans-serif;cursor:pointer;
+    }
+    .notice-filter.active{border-color:var(--steel);background:var(--steel);color:#fff}
+    .notice-list{display:grid;gap:10px}
+    .notice-card{
+      display:flex;align-items:flex-start;gap:13px;padding:16px;background:var(--card);
+      border:1px solid var(--line-soft);border-radius:9px;box-shadow:0 1px 3px rgba(28,27,25,.04);
+    }
+    .notice-mark{
+      display:grid;place-items:center;width:34px;height:34px;flex:none;border-radius:9px;
+      background:var(--moss-bg);color:var(--moss);font-weight:700;
+    }
+    .notice-card.warn .notice-mark{background:var(--rust-bg);color:var(--rust)}
+    .notice-card.info .notice-mark{background:#fbeed8;color:var(--amber-dark)}
+    .notice-copy{min-width:0;flex:1}
+    .notice-copy h3{font:600 14px 'IBM Plex Sans',sans-serif;text-transform:none;letter-spacing:0}
+    .notice-copy p{margin:4px 0 0;color:var(--steel-3);font-size:12.5px;line-height:1.5}
+    .notice-type{flex:none}
+    @media(max-width:768px){.notice-summary{grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}.notice-summary .stat{padding:13px}.notice-summary .stat .num{font-size:20px}}
+    @media(max-width:480px){.notice-summary{grid-template-columns:1fr}.notice-card{padding:13px}.notice-type{display:none}}
+  </style>
+</head>
+<body>
+  <div class="shell">
+    <div id="sidebarSlot"></div>
+    <main class="main">
+      <div id="topbarSlot"></div>
+      <div class="content">
+        <section class="notice-summary" aria-label="Bildirishnomalar soni">
+          <div class="stat rust"><div class="bar"></div><div class="num" id="warnCount">0</div><div class="lbl">Muhim eslatmalar</div></div>
+          <div class="stat"><div class="bar"></div><div class="num" id="infoCount">0</div><div class="lbl">Yangi xabarlar</div></div>
+          <div class="stat moss"><div class="bar"></div><div class="num" id="okCount">0</div><div class="lbl">Bajarilganlar</div></div>
+        </section>
+        <section class="card">
+          <div class="card-head notice-toolbar">
+            <h3>So'nggi bildirishnomalar</h3>
+            <div class="notice-filters" role="group" aria-label="Bildirishnomalarni turiga qarab filtrlash">
+              <button class="notice-filter active" type="button" data-filter="all" aria-pressed="true">Barchasi</button>
+              <button class="notice-filter" type="button" data-filter="warn" aria-pressed="false">Muhim</button>
+              <button class="notice-filter" type="button" data-filter="info" aria-pressed="false">Xabarlar</button>
+              <button class="notice-filter" type="button" data-filter="ok" aria-pressed="false">Bajarilgan</button>
+            </div>
+          </div>
+          <div class="card-body">
+            <div class="notice-list" id="noticeList" aria-live="polite"></div>
+          </div>
+        </section>
+      </div>
+    </main>
+  </div>
+  <script src="assets/data.js"></script>
+  <script src="assets/app.js"></script>
+  <script>
+    const noticeTypes = {
+      warn:{label:'Muhim', icon:'!'},
+      info:{label:'Yangi xabar', icon:'i'},
+      ok:{label:'Bajarildi', icon:'✓'}
+    };
+    const counts = NOTIFICATIONS.reduce((result, notice) => {
+      result[notice.type] = (result[notice.type] || 0) + 1;
+      return result;
+    }, {});
+    document.getElementById('warnCount').textContent = counts.warn || 0;
+    document.getElementById('infoCount').textContent = counts.info || 0;
+    document.getElementById('okCount').textContent = counts.ok || 0;
+
+    const list = document.getElementById('noticeList');
+    function renderNotifications(filter='all'){
+      const visible = NOTIFICATIONS.filter(notice => filter === 'all' || notice.type === filter);
+      list.innerHTML = visible.map(notice => {
+        const type = noticeTypes[notice.type] || noticeTypes.info;
+        return `<article class="notice-card ${notice.type}">
+          <div class="notice-mark" aria-hidden="true">${type.icon}</div>
+          <div class="notice-copy">
+            <h3>${notice.title}</h3>
+            <p>${notice.text}</p>
+          </div>
+          <span class="chip notice-type ${notice.type === 'warn' ? 'danger' : notice.type === 'info' ? 'warn' : ''}"><span class="dot"></span>${type.label}</span>
+        </article>`;
+      }).join('') || '<div class="empty">Bu turdagi bildirishnomalar yo‘q.</div>';
+    }
+
+    document.querySelectorAll('.notice-filter').forEach(button => {
+      button.addEventListener('click', () => {
+        document.querySelectorAll('.notice-filter').forEach(filterButton => {
+          const active = filterButton === button;
+          filterButton.classList.toggle('active', active);
+          filterButton.setAttribute('aria-pressed', String(active));
+        });
+        renderNotifications(button.dataset.filter);
+      });
+    });
+    renderNotifications();
+
+    const supportedRoles = ['ishchi','brigadir','buxgalter','hr','ceo','omborchi'];
+    const savedRole = sessionStorage.getItem('qnRole');
+    mountShell(supportedRoles.includes(savedRole) ? savedRole : 'brigadir',
+      'notifications','Bildirishnomalar','Muhim eslatmalar va tizim xabarlari');
+  </script>
+</body>
+</html>

@@ -1,0 +1,313 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CEO — Qurilish Nazorat</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Oswald:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/style.css">
+<style>
+.rating-item{ margin-bottom:18px; }
+.rating-item .ri-head{ display:flex; justify-content:space-between; align-items:baseline; gap:8px; margin-bottom:6px; font-size:13px; }
+.rating-item .medal{ font-family:'Oswald'; font-size:12px; padding:2px 8px; background:var(--paper-2); border:1.5px dashed var(--line); }
+.rating-item .medal.gold{ background:#fff3cc; border-color:#d4a017; color:#7a5c00; }
+.rating-item .medal.silver{ background:#f0f2f4; border-color:#8f9a97; color:#4a5b64; }
+.rating-item .medal.bronze{ background:#f9ece5; border-color:#b6452e; color:#7a2d1a; }
+
+.idle-row{ background:var(--rust-bg); }
+.two-col-grid{ display:grid; grid-template-columns:1fr 1fr; gap:16px; margin-bottom:26px; }
+@media(max-width:700px){ .two-col-grid{ grid-template-columns:1fr; } }
+</style>
+</head>
+<body>
+<div class="shell">
+  <div id="sidebarSlot"></div>
+  <div class="main">
+    <div id="topbarSlot"></div>
+    <div class="content">
+
+      <!-- KPI STATS -->
+      <div class="grid g-4 stat-row mb-26">
+        <div class="stat"><div class="bar"></div><div class="num" id="stWorkers">—</div><div class="lbl">Jami ishchilar</div></div>
+        <div class="stat"><div class="bar"></div><div class="num">4</div><div class="lbl">Faol brigadlar</div></div>
+        <div class="stat moss"><div class="bar"></div><div class="num" id="stBeton">—</div><div class="lbl">Shu oy beton (m³)</div></div>
+        <div class="stat rust"><div class="bar"></div><div class="num" id="stIdle">—</div><div class="lbl">Nofaol ishchilar</div></div>
+      </div>
+
+      <!-- BRIGADLAR REYTINGI -->
+      <div id="brigadlar" style="scroll-margin-top:70px;margin-bottom:26px">
+        <div class="section-lbl">Brigadlar reytingi — shu oy beton (m³)</div>
+        <div class="two-col-grid">
+          <div class="card">
+            <div class="card-head"><h3>Beton quyish (m³)</h3></div>
+            <div class="card-body" id="brigRating"></div>
+          </div>
+          <div class="card">
+            <div class="card-head"><h3>Oylar dinamikasi</h3></div>
+            <div class="tbl-wrap" style="border:none">
+              <table>
+                <thead><tr><th>Oy</th><th>Ishchilar</th><th>Beton</th><th>Davomat</th></tr></thead>
+                <tbody id="archBody"></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ISHCHILAR REYTINGI -->
+      <div id="ishchilar" style="scroll-margin-top:70px;margin-bottom:26px">
+        <div class="section-lbl">Ishchilar reytingi</div>
+        <div class="two-col-grid">
+          <div class="card">
+            <div class="card-head"><h3>Eng faol ishchilar (ish kunlari)</h3></div>
+            <div class="tbl-wrap" style="border:none">
+              <table>
+                <thead><tr><th>#</th><th>Ishchi</th><th>Brigada</th><th>Kun</th></tr></thead>
+                <tbody id="topWorkers"></tbody>
+              </table>
+            </div>
+          </div>
+          <div class="card">
+            <div class="card-head">
+              <h3>Nofaol / ishsiz ishchilar</h3>
+              <span class="chip danger" style="font-size:10px" id="idleBadge"></span>
+            </div>
+            <div id="idleList"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- O'TKAZISH -->
+      <div id="otkazish" style="scroll-margin-top:70px;margin-bottom:26px">
+        <div class="section-lbl">Brigadadan brigadaga o'tkazish</div>
+        <div class="card">
+          <div class="card-body">
+            <div class="grid g-3">
+              <div class="field">
+                <label>Ishchi tanlash</label>
+                <select id="trWorker" onchange="syncFrom()"></select>
+              </div>
+              <div class="field">
+                <label>Joriy brigada</label>
+                <input type="text" id="trFrom" readonly style="background:var(--paper-2)">
+              </div>
+              <div class="field">
+                <label>Yangi brigada</label>
+                <select id="trTo"></select>
+              </div>
+              <div class="field" style="grid-column:1/-1">
+                <label>Izoh (ixtiyoriy)</label>
+                <input type="text" id="trNote" placeholder="O'tkazish sababi...">
+              </div>
+            </div>
+            <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center">
+              <button class="btn amber" onclick="sendTransfer()">Yuborish — brigadirga bildirishnoma</button>
+              <button class="btn ghost" onclick="boshatish()">Ishsiz qilish (bo'shatish)</button>
+            </div>
+          </div>
+          <!-- pending transfers -->
+          <div style="border-top:1px solid var(--line-soft);padding:14px 18px">
+            <div class="section-lbl" style="margin-bottom:10px">So'nggi o'tkazishlar</div>
+            <div id="transferLog"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- BARCHA ISHCHILAR (CEO ko'rishi) -->
+      <div id="arxiv" style="scroll-margin-top:70px">
+        <div class="section-lbl">Barcha ishchilar — to'liq ro'yxat</div>
+        <div class="card" style="margin-bottom:26px">
+          <div style="display:flex;gap:8px;flex-wrap:wrap;padding:14px 18px;border-bottom:1px solid var(--line-soft)">
+            <input type="text" id="ceoSearch" placeholder="Qidiruv..." style="flex:1;min-width:140px;max-width:240px">
+            <select id="ceoBrig" style="flex:1;min-width:120px;max-width:200px"><option value="">Barcha brigadlar</option></select>
+            <select id="ceoCountry" style="flex:1;min-width:120px;max-width:180px"><option value="">Barcha davlatlar</option></select>
+          </div>
+          <div class="tbl-wrap" style="border:none">
+            <table>
+              <thead>
+                <tr>
+                  <th>Ishchi</th>
+                  <th>Brigada</th>
+                  <th class="hide-mobile">Davlat</th>
+                  <th>Holat</th>
+                  <th>Qarzi</th>
+                  <th class="hide-mobile">Hujjatlar</th>
+                  <th></th>
+                </tr>
+              </thead>
+              <tbody id="ceoAllBody"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<script src="assets/data.js"></script>
+<script src="assets/app.js"></script>
+<script>
+mountShell('ceo','dash','Boshqaruv paneli',"To'liq nazorat · 4 brigada · Rustam Mahmudov");
+
+/* KPI */
+const idle = WORKERS.filter(w=>w.holat==='nofaol');
+document.getElementById('stWorkers').textContent = WORKERS.length;
+document.getElementById('stBeton').textContent = BRIGADES.reduce((s,b)=>s+b.m3,0)+' m³';
+document.getElementById('stIdle').textContent = idle.length;
+
+/* ---- BRIG RATING ---- */
+const maxM3 = Math.max(...BRIGADES.map(b=>b.m3));
+const sorted = [...BRIGADES].sort((a,b)=>b.m3-a.m3);
+const medals = ['gold','silver','bronze',''];
+document.getElementById('brigRating').innerHTML = sorted.map((b,i) => `
+  <div class="rating-item">
+    <div class="ri-head">
+      <div><span class="medal ${medals[i]}">#${i+1}</span> <b>${b.name}</b></div>
+      <span class="mono fw6">${b.m3} m³</span>
+    </div>
+    <div class="progress ${i===0?'moss':''}"><span style="width:${(b.m3/maxM3*100).toFixed(0)}%"></span></div>
+    <div style="font-size:11px;color:var(--steel-3);margin-top:4px">${b.obj} · ${b.workers} ishchi</div>
+  </div>`).join('');
+
+/* archive */
+document.getElementById('archBody').innerHTML = ARCHIVE_MONTHS.map(m => `
+  <tr>
+    <td>${m.oy}</td>
+    <td class="mono">${m.ishchilar}</td>
+    <td class="mono">${m.beton} m³</td>
+    <td><span class="chip ${parseInt(m.davomat)>=90?'':'warn'}"><span class="dot"></span>${m.davomat}</span></td>
+  </tr>`).join('');
+
+/* ---- WORKER RATING ---- */
+const withDays = WORKERS.map((w,i) => ({...w, days: 18 - (i % 5)}));
+const topW = [...withDays].sort((a,b)=>b.days-a.days).slice(0,8);
+document.getElementById('topWorkers').innerHTML = topW.map((w,i) => `
+  <tr>
+    <td style="font-weight:700;color:var(--steel-3)">${i+1}</td>
+    <td>
+      <div style="display:flex;align-items:center;gap:8px">
+        <div class="avatar sm" style="background:${avatarColor(w.id)}">${initials(w.ism,w.fam)}</div>
+        ${w.ism} ${w.fam}
+      </div>
+    </td>
+    <td style="font-size:12px;color:var(--steel-3)">${brigName(w.brigade).replace(' brigadasi','')}</td>
+    <td><span class="chip ${w.days>=17?'moss':w.days>=14?'warn':'danger'}"><span class="dot"></span>${w.days} kun</span></td>
+  </tr>`).join('');
+
+/* idle */
+document.getElementById('idleBadge').innerHTML = `<span class="dot"></span>${idle.length} nafar`;
+document.getElementById('idleList').innerHTML = idle.length
+  ? idle.map(w => `
+  <div class="idle-row" style="display:flex;align-items:center;gap:12px;padding:12px 16px;border-bottom:1px solid var(--line-soft)">
+    <div class="avatar sm" style="background:${avatarColor(w.id)}">${initials(w.ism,w.fam)}</div>
+    <div style="flex:1">
+      <div style="font-weight:600;font-size:13px">${w.ism} ${w.fam}</div>
+      <div style="font-size:11.5px;color:var(--steel-3)">${brigName(w.brigade)}</div>
+    </div>
+    <span class="chip danger" style="font-size:10px"><span class="dot"></span>Nofaol</span>
+  </div>`).join('')
+  : '<div class="empty" style="margin:14px">Nofaol ishchi yo\'q ✓</div>';
+
+/* ---- TRANSFER ---- */
+document.getElementById('trWorker').innerHTML = WORKERS.map(w =>
+  `<option value="${w.id}" data-brig="${w.brigade}">${w.ism} ${w.fam}</option>`).join('');
+document.getElementById('trTo').innerHTML = BRIGADES.map(b =>
+  `<option value="${b.id}">${b.name} brigadasi</option>`).join('');
+
+function syncFrom(){
+  const opt = document.getElementById('trWorker').selectedOptions[0];
+  const brigId = opt?.dataset.brig;
+  const b = BRIGADES.find(x=>x.id===brigId);
+  document.getElementById('trFrom').value = b ? b.name+' brigadasi' : '—';
+}
+syncFrom();
+
+const transferLog = [];
+function sendTransfer(){
+  const wOpt = document.getElementById('trWorker').selectedOptions[0];
+  const tOpt = document.getElementById('trTo').selectedOptions[0];
+  const note = document.getElementById('trNote').value;
+  const entry = {
+    ism: wOpt.text, brigada: tOpt.text, sana: TODAY, izoh: note||'Sabab ko\'rsatilmadi'
+  };
+  transferLog.unshift(entry);
+  renderTransferLog();
+  toast(`${wOpt.text} → ${tOpt.text} bildirishnoma yuborildi ✓`);
+}
+function boshatish(){
+  const wOpt = document.getElementById('trWorker').selectedOptions[0];
+  toast(`${wOpt.text} ishsiz qilindi. "Nofaol" ro'yxatiga tushdi.`,"warn");
+}
+function renderTransferLog(){
+  const el = document.getElementById('transferLog');
+  if(!transferLog.length){
+    el.innerHTML = '<div class="empty">Hali o\'tkazishlar amalga oshirilmagan</div>'; return;
+  }
+  el.innerHTML = transferLog.map(e => `
+    <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:10px;padding:10px 0;border-bottom:1px solid var(--line-soft);flex-wrap:wrap">
+      <div>
+        <div style="font-weight:600;font-size:13px">${e.ism}</div>
+        <div style="font-size:12px;color:var(--steel-3)">${e.brigada} · ${e.sana}</div>
+        <div style="font-size:11.5px;color:var(--steel-3);margin-top:2px">${e.izoh}</div>
+      </div>
+      <span class="chip warn"><span class="dot"></span>Kutilmoqda</span>
+    </div>`).join('');
+}
+renderTransferLog();
+
+/* ---- CEO ALL TABLE ---- */
+BRIGADES.forEach(b => document.getElementById('ceoBrig').insertAdjacentHTML('beforeend',
+  `<option value="${b.id}">${b.name}</option>`));
+COUNTRIES.forEach(c => document.getElementById('ceoCountry').insertAdjacentHTML('beforeend',
+  `<option value="${c}">${c}</option>`));
+function renderCeoAll(){
+  const q  = (document.getElementById('ceoSearch').value||'').toLowerCase();
+  const fb = document.getElementById('ceoBrig').value;
+  const fc = document.getElementById('ceoCountry').value;
+  const rows = WORKERS.filter(w => {
+    if(q && !(w.ism+' '+w.fam+w.passport).toLowerCase().includes(q)) return false;
+    if(fb && w.brigade!==fb) return false;
+    if(fc && w.country!==fc) return false;
+    return true;
+  });
+  const minDoc = w => Math.min(daysLeft(w.sertifikat.muddat), daysLeft(w.patent.muddat), daysLeft(w.royxat.muddat));
+  document.getElementById('ceoAllBody').innerHTML = rows.map(w => {
+    const md = minDoc(w);
+    return `<tr>
+      <td style="display:flex;align-items:center;gap:8px">
+        <div class="avatar sm" style="background:${avatarColor(w.id)}">${initials(w.ism,w.fam)}</div>
+        <div>
+          <div style="font-weight:600;font-size:13px">${w.ism} ${w.fam}</div>
+          <div style="font-size:10.5px;color:var(--steel-3)" class="mono">${w.passport}</div>
+        </div>
+      </td>
+      <td style="font-size:12.5px">${brigName(w.brigade)}</td>
+      <td class="hide-mobile">${w.country}</td>
+      <td>
+        ${w.holat==='ishlamoqda'
+          ? '<span class="chip"><span class="dot"></span>Faol</span>'
+          : '<span class="chip danger"><span class="dot"></span>Nofaol</span>'}
+      </td>
+      <td class="mono ${w.qarz>0?'txt-rust fw6':''}">${money(w.qarz)} ₽</td>
+      <td class="hide-mobile">
+        ${md<=7 ? '<span class="chip danger" style="font-size:10px"><span class="dot"></span>Kritik</span>'
+          : md<=20 ? '<span class="chip warn" style="font-size:10px"><span class="dot"></span>Diqqat</span>'
+          : '<span class="chip" style="font-size:10px"><span class="dot"></span>Normal</span>'}
+      </td>
+      <td>
+        <div style="display:flex;gap:6px;flex-wrap:wrap">
+          <button class="btn ghost sm" onclick="toast('${w.ism} ${w.fam} profili')">Ko'rish</button>
+          <button class="btn sm" style="background:var(--steel-2);border:none" onclick="toast('O\\'tkazish oynasi ochildi','warn')">O'tkazish</button>
+        </div>
+      </td>
+    </tr>`;
+  }).join('') || '<tr><td colspan="7" style="text-align:center;color:var(--steel-3);padding:24px">Natija yo\'q</td></tr>';
+}
+['ceoSearch','ceoBrig','ceoCountry'].forEach(id =>
+  document.getElementById(id).addEventListener('input', renderCeoAll));
+renderCeoAll();
+</script>
+</body>
+</html>

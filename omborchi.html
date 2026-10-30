@@ -1,0 +1,18 @@
+<!DOCTYPE html><html lang="uz"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Omborchi — Qurilish Nazorat</title>
+<link href="https://fonts.googleapis.com/css2?family=Oswald:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/style.css">
+<style>.row{display:flex;gap:8px;flex-wrap:wrap;align-items:center;border-bottom:1px solid #eee;padding:8px 0}.row input{width:120px}.sm2{font-size:12px;color:#5d6870}</style></head>
+<body><div class="shell"><div id="sidebarSlot"></div><div class="main"><div id="topbarSlot"></div><div class="content"><div class="card mb-20"><div class="card-body"><b>Ish tartibi:</b> 1) HR patentni kiritadi, 2) ishchi shu yerga tushadi, 3) kiyim narxini yozib «Berildi» bosasiz, 4) sana ishchi profiliga yoziladi va narx qarzga o‘tadi, 5) 6 oy ishlagach qarz avtomatik kechiriladi.</div></div>
+<div class="section-lbl">Kiyim berish kerak (patent olingan ishchilar)</div><div class="card mb-26"><div class="card-body" id="q"></div></div>
+<div class="section-lbl">Berilganlar</div><div class="card mb-26"><div class="card-body" id="d"></div></div>
+</div></div></div>
+<script src="assets/data.js"></script><script src="assets/app.js"></script><script src="assets/qn.js"></script>
+<script>
+const $=i=>document.getElementById(i);
+function give(id){const w=S.ws.find(x=>x.id==id),p=+$('p'+id).value;if(!p)return toast('Kiyim narxini kiriting','warn');
+ w.kiyim={sana:S.today,narx:p};debt(w,'kiyim','Kiyim (bir martalik)',p,true);audit(w,'Ish kiyimi berildi',`Berilgan sana: ${S.today}; kiyim narxi: ${fmt(p)}; summa qarzga yozildi.`);save();render();toast(w.ism+' '+w.fam+': kiyim berildi, profilga yozildi ✓')}
+function render(){tick();bell();const a=S.ws.filter(w=>w.kiyim=='kutmoqda'&&w.st!='tarix'),b=S.ws.filter(w=>w.kiyim&&w.kiyim.sana);
+ $('q').innerHTML=a.map(w=>`<div class="row"><b style="min-width:170px">${w.fam} ${w.ism}</b><span class="sm2" style="flex:1">Patent olindi: ${w.steps.patent.sana}</span><input type="number" id="p${w.id}" placeholder="Narx ${RUB}"><button class="btn amber sm" onclick="give('${w.id}')">Berildi ✓</button></div>`).join('')||'<div class="empty">Hozircha kutayotgan ishchi yo\'q. HR patentni kiritganda shu yerga avtomatik tushadi.</div>';
+ $('d').innerHTML=b.map(w=>`<div class="row"><b style="min-width:170px">${w.fam} ${w.ism}</b><span style="flex:1">${w.kiyim.sana} · ${fmt(w.kiyim.narx)}</span><span class="sm2">${w.qarz.find(x=>x.id=='kiyim'&&x.yopildi)?'qarz kechirildi (6 oy)':'qarzga yozilgan'}</span></div>`).join('')||'<div class="empty">Hali berilmagan</div>'}
+render();demo();mountShell('omborchi','kiyim','Ombor','Bir martalik kiyim berish');
+</script></body></html>
